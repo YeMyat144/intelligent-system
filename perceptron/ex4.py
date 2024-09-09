@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 
 # Load the dataset (assuming bmi.csv is properly formatted with Height, Weight, and BMI columns)
-data = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\perceptron\bmi.csv')
-data = data[['Height', 'Weight', 'BMI']]  # Ignore 'gender' column
+data = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\perceptron\bmi.csv', header=None)
+data.columns = ['Gender', 'Height', 'Weight', 'BMI']  
+data = data[['Height', 'Weight', 'BMI']]
 
 # Normalize the data
 data['Height'] = (data['Height'] - data['Height'].min()) / (data['Height'].max() - data['Height'].min())
@@ -45,7 +46,7 @@ def predict_bmi(height, weight, weights, bias):
     return sigmoid(np.dot(inputs, weights) + bias)
 
 # Example prediction
-height = 1.75  # Normalized value of height
-weight = 70    # Normalized value of weight
+height = int(input("Enter height: "))
+weight = int(input("Enter weight: "))
 predicted_bmi = predict_bmi(height, weight, trained_weights, trained_bias)
 print(f"Predicted BMI: {predicted_bmi}")
