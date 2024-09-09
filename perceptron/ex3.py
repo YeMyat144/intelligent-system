@@ -6,23 +6,24 @@ def sigmoid(x):
 def sigmoid_derivative(x):
     return sigmoid(x) * (1 - sigmoid(x))
 
-# Perceptron Parameters
-weights = np.array([0.5, -0.5])
+# Initial inputs, weights, bias, and learning rate
+x1, x2 = 0.7, -0.6
+weights = np.array([0.5, 0.5])
 bias = 0.5
 alpha = 0.1
+target_output = 1
 
-# Inputs
-x1, x2 = 0.7, -0.6
-desired_output = 1
+# Forward pass
+input_sum = np.dot([x1, x2], weights) + bias
+predicted_output = sigmoid(input_sum)
 
-for epoch in range(10):  # Run for 10 epochs
-    weighted_sum = np.dot(weights, np.array([x1, x2])) + bias
-    output = sigmoid(weighted_sum)
-    error = desired_output - output
-    delta = error * sigmoid_derivative(weighted_sum)
-    
-    # Update weights and bias
-    weights += alpha * delta * np.array([x1, x2])
-    bias += alpha * delta * 1
-    
-    print(f"Epoch {epoch+1}: weights = {weights}, bias = {bias}")
+# Delta Rule (Weight Update)
+error = target_output - predicted_output
+delta = error * sigmoid_derivative(input_sum)
+
+# Update weights and bias
+weights += alpha * delta * np.array([x1, x2])
+bias += alpha * delta
+
+print(f"Updated Weights: {weights}")
+print(f"Updated Bias: {bias}")

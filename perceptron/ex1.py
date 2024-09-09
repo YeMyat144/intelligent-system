@@ -1,22 +1,24 @@
 import numpy as np
 
-def step_function(x):
-    return 1 if x >= 0 else 0
-
-def perceptron(x1, x2, w1, w2, bias):
-    weighted_sum = w1 * x1 + w2 * x2 + bias
-    return step_function(weighted_sum)
+def perceptron(inputs, weights, threshold):
+    weighted_sum = np.dot(inputs, weights)
+    return 1 if weighted_sum >= threshold else 0
 
 # AND function
 weights_and = [0.5, 0.5]
-bias_and = -0.7  # Threshold
-print("AND Function:")
-for x1, x2 in [(0, 0), (0, 1), (1, 0), (1, 1)]:
-    print(f"Input: ({x1}, {x2}) => Output: {perceptron(x1, x2, weights_and[0], weights_and[1], bias_and)}")
+threshold_and = 0.7
 
 # OR function
 weights_or = [0.5, 0.5]
-bias_or = -0.2  # Threshold
-print("\nOR Function:")
-for x1, x2 in [(0, 0), (0, 1), (1, 0), (1, 1)]:
-    print(f"Input: ({x1}, {x2}) => Output: {perceptron(x1, x2, weights_or[0], weights_or[1], bias_or)}")
+threshold_or = 0.3
+
+# Input combinations (truth table)
+inputs = [[0, 0], [0, 1], [1, 0], [1, 1]]
+
+print("AND Perceptron Output:")
+for x in inputs:
+    print(f"Input: {x}, Output: {perceptron(x, weights_and, threshold_and)}")
+
+print("\nOR Perceptron Output:")
+for x in inputs:
+    print(f"Input: {x}, Output: {perceptron(x, weights_or, threshold_or)}")
