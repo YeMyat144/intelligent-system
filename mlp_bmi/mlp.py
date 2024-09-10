@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 # Load dataset
-data = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\perceptron\bmi.csv', header=None)
+data = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\perceptron\bmi.csv')
 
 # Preprocessing: Convert Gender to numerical values (assuming Male = 0, Female = 1)
 data['Gender'] = data['Gender'].map({'Male': 0, 'Female': 1})
