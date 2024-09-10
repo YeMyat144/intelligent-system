@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 
-# Load dataset
-data = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\perceptron\bmi.csv')
+# Load dataset without header and manually assign column names
+data = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\mlp_bmi\bmi.csv', header=None)
+data.columns = ['Gender', 'Height', 'Weight', 'BMI']  # Manually assigning the column names
 
 # Preprocessing: Convert Gender to numerical values (assuming Male = 0, Female = 1)
 data['Gender'] = data['Gender'].map({'Male': 0, 'Female': 1})
