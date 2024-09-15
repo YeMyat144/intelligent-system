@@ -35,3 +35,5 @@ if len(scores) != 10:
 # Calculate and print the result
 min_score, max_score = bowling_game(scores)
 print(min_score, max_score)
+
+
