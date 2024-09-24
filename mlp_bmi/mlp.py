@@ -1,74 +1,121 @@
-import numpy as np
 import pandas as pd
+import numpy as np
+from numpy import random
 
-# Load dataset without header and manually assign column names
-data = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\mlp_bmi\bmi.csv', header=None)
-data.columns = ['Gender', 'Height', 'Weight', 'BMI']  # Manually assigning the column names
+learning_rate = 0.1
+epochs = 1000
+df = pd.read_csv(r'C:\Users\Ye Myat Moe\Documents\sp\intelligent_system\mlp_bmi\bmi.csv', header=None, names=["Gender", "Height", "Weight", "Index"])
+print(df.head())
 
-# Preprocessing: Convert Gender to numerical values (assuming Male = 0, Female = 1)
-data['Gender'] = data['Gender'].map({'Male': 0, 'Female': 1})
+df['Gender'] = df['Gender'].map({'Male': 1, 'Female': 0})
+x0 = df['Gender'].values
+x1 = df['Height'].values
+x2 = df['Weight'].values
+y = df['Index'].values
 
-# Normalize the Height and Weight features
-data['Height'] = data['Height'] / data['Height'].max()
-data['Weight'] = data['Weight'] / data['Weight'].max()
+def normalize_data(data):
+    return (data - data.mean()) / data.std()
 
-# Features (Gender, Height, Weight) and labels (BMI)
-X = data[['Gender', 'Height', 'Weight']].values
-y = data['BMI'].values.reshape(-1, 1)
+def sigmoid(x):
+    # Clip values to prevent overflow in exp
+    return 1 / (1 + np.exp(-np.clip(x, -250, 250)))
 
-# Sigmoid activation function
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
+def prediction(gender, height, weight, weights, bias):
+    weighted_sum = gender * weights[0] + height * weights[1] + weight * weights[2] - bias
+    sigmoid_output = sigmoid(weighted_sum)
+    return sigmoid_output * 5
 
-# Derivative of the sigmoid function
-def sigmoid_derivative(z):
-    return z * (1 - z)
+def fit(x0, x1, x2, y, epochs):
+    X = np.column_stack((x0, x1, x2))
+    weights = [random.rand(3) for _ in range(4)]
+    biases = random.rand(4)
+    history = []
+    learning_rate = 0.01
 
-# Initialize weights and biases for a 3-x-1 topology
-input_layer_neurons = X.shape[1]  # 3 inputs
-hidden_layer_neurons = 5  # Arbitrary hidden layer size
-output_neurons = 1  # 1 output (BMI)
+    for epoch in range(epochs):
+        errors = []
 
-# Random weight initialization
-w_input_hidden = np.random.uniform(size=(input_layer_neurons, hidden_layer_neurons))
-b_hidden = np.random.uniform(size=(1, hidden_layer_neurons))
-w_hidden_output = np.random.uniform(size=(hidden_layer_neurons, output_neurons))
-b_output = np.random.uniform(size=(1, output_neurons))
+        for g, h, w, ytrain in zip(x0, x1, x2, y):
+            # Use different variable names inside loop to avoid conflict
+            x1_pred = prediction(g, h, w, weights[0], biases[0])
+            x2_pred = prediction(g, h, w, weights[1], biases[1])
+            x3_pred = prediction(g, h, w, weights[2], biases[2])
 
-# Learning rate and epochs
-learning_rate = 0.01
-epochs = 10000
+            ypred = prediction(x1_pred, x2_pred, x3_pred, weights[3], biases[3])
+            error = ytrain - ypred
+            error_gy = ypred * (1 - ypred) * error
 
-# Training the MLP
-for epoch in range(epochs):
-    # Forward Propagation
-    hidden_layer_activation = np.dot(X, w_input_hidden) + b_hidden
-    hidden_layer_output = sigmoid(hidden_layer_activation)
-    
-    output_layer_activation = np.dot(hidden_layer_output, w_hidden_output) + b_output
-    predicted_output = sigmoid(output_layer_activation)
-    
-    # Compute the error
-    error = y - predicted_output
-    
-    # Backpropagation
-    d_predicted_output = error * sigmoid_derivative(predicted_output)
-    
-    error_hidden_layer = d_predicted_output.dot(w_hidden_output.T)
-    d_hidden_layer = error_hidden_layer * sigmoid_derivative(hidden_layer_output)
-    
-    # Update weights and biases
-    w_hidden_output += hidden_layer_output.T.dot(d_predicted_output) * learning_rate
-    b_output += np.sum(d_predicted_output, axis=0, keepdims=True) * learning_rate
-    w_input_hidden += X.T.dot(d_hidden_layer) * learning_rate
-    b_hidden += np.sum(d_hidden_layer, axis=0, keepdims=True) * learning_rate
-    
-    # Print the error for every 1000 epochs
-    if epoch % 1000 == 0:
-        mse = np.mean(np.square(error))
-        print(f"Epoch {epoch}, Mean Squared Error: {mse}")
+            w41 = learning_rate * x1_pred * error_gy
+            w42 = learning_rate * x2_pred * error_gy
+            w43 = learning_rate * x3_pred * error_gy
+            bias4 = learning_rate * -1 * error_gy
 
-# Output the final weights and biases
-print("Training complete.")
-print("Final weights (input to hidden):", w_input_hidden)
-print("Final weights (hidden to output):", w_hidden_output)
+            error_gx1 = x1_pred * (1 - x1_pred) * error_gy * weights[3][0]
+            error_gx2 = x2_pred * (1 - x2_pred) * error_gy * weights[3][1]
+            error_gx3 = x3_pred * (1 - x3_pred) * error_gy * weights[3][2]
+
+            w11 = learning_rate * g * error_gx1
+            w21 = learning_rate * h * error_gx1
+            w31 = learning_rate * w * error_gx1
+            bias1 = learning_rate * -1 * error_gx1
+
+            w12 = learning_rate * g * error_gx2
+            w22 = learning_rate * h * error_gx2
+            w32 = learning_rate * w * error_gx2
+            bias2 = learning_rate * -1 * error_gx2
+
+            w13 = learning_rate * g * error_gx3
+            w23 = learning_rate * h * error_gx3
+            w33 = learning_rate * w * error_gx3
+            bias3 = learning_rate * -1 * error_gx3
+
+            weights[0][0] += w11
+            weights[0][1] += w12
+            weights[0][2] += w13
+
+            weights[1][0] += w21
+            weights[1][1] += w22
+            weights[1][2] += w23
+
+            weights[2][0] += w31
+            weights[2][1] += w32
+            weights[2][2] += w33
+
+            weights[3][0] += w41
+            weights[3][1] += w42
+            weights[3][2] += w43
+
+            errors.append(error)
+
+        if epoch % 100 == 0:
+            mse = np.mean(np.square(errors))
+            print(f"Epoch {epoch + 1}, MSE = {mse}")
+
+    print(f"Converged at iteration {epoch + 1}. Last MSE = {mse}")
+    return weights, biases
+
+norm_x0 = normalize_data(x0) # gender
+norm_x1 = normalize_data(x1) # height
+norm_x2 = normalize_data(x2) # weight
+
+weights, biases = fit(norm_x0, norm_x1, norm_x2, y, epochs)
+
+# Assuming you have new values for height and weight
+new_height = 189
+new_weight = 87
+
+# Normalize the new data using the same normalization function
+normalized_new_height = (new_height - x1.mean()) / x1.std()
+normalized_new_weight = (new_weight - x2.mean()) / x2.std()
+
+# Combine the normalized values into a single array
+new_data = np.array([1, normalized_new_height, normalized_new_weight])
+
+# Make a prediction using the trained weights and biases
+print()
+print(1, new_height, new_weight)
+print(weights)
+prediction = np.dot(new_data, weights[3]) + biases[3]
+
+print()
+print("Predicted Probability:", prediction)
