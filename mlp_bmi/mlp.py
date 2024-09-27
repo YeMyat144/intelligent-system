@@ -101,8 +101,8 @@ norm_x2 = normalize_data(x2) # weight
 weights, biases = fit(norm_x0, norm_x1, norm_x2, y, epochs)
 
 # Assuming you have new values for height and weight
-new_height = 189
-new_weight = 87
+new_height = int(input("Enter new height: "))
+new_weight = int(input("Enter new weight: "))
 
 # Normalize the new data using the same normalization function
 normalized_new_height = (new_height - x1.mean()) / x1.std()
